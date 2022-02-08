@@ -28,6 +28,8 @@ namespace riderlambdatest.Controllers
         {
             try
             {
+                this.logger.LogTrace("traceee");
+                this.logger.LogInformation("INfo");
                 throw new Exception("Poopies");
                 return View("Index");
             }

@@ -1,8 +1,12 @@
+using System;
+using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NLog;
-using NLog.Web;
+using Serilog;
+using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
 namespace riderlambdatest
 {
@@ -27,6 +31,21 @@ namespace riderlambdatest
 
         Amazon.Lambda.AspNetCoreServer.ApplicationLoadBalancerFunction
     {
+        public LambdaEntryPoint()
+        {
+            var configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .WriteTo.Console(new JsonFormatter())
+                .Enrich.WithExceptionDetails()
+                .CreateLogger();
+        }
+        
         /// <summary>
         /// The builder has configuration, logging and Amazon API Gateway already configured. The startup class
         /// needs to be configured in this method using the UseStartup<>() method.
@@ -34,16 +53,13 @@ namespace riderlambdatest
         /// <param name="builder"></param>
         protected override void Init(IWebHostBuilder builder)
         {
-            var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-
             builder
-                .UseStartup<Startup>()
-                .ConfigureLogging(logging =>
+                .ConfigureLogging(loggingBuilder =>
                 {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);    
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.AddSerilog();
                 })
-                .UseNLog();
+                .UseStartup<Startup>();
         }
 
         /// <summary>
