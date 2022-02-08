@@ -28,16 +28,16 @@ namespace riderlambdatest.Controllers
         {
             try
             {
-                this.logger.LogTrace("traceee");
-                this.logger.LogInformation("INfo");
+                this.logger.LogTrace("traceee {username}", "john");
+                this.logger.LogInformation("INfo {bobbob1}", "yes");
                 throw new Exception("Poopies");
                 return View("Index");
             }
             catch (Exception ex)
             {
-                this.logger.LogError("Something!", ex);
+                this.logger.LogError(ex, "Something!", null);
                 throw;
             }
-        } 
+        }
     }
 }

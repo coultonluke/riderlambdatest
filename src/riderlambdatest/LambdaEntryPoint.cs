@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
 using Serilog.Formatting.Json;
 
 namespace riderlambdatest
@@ -41,8 +42,8 @@ namespace riderlambdatest
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
-                .WriteTo.Console(new JsonFormatter())
-                .Enrich.WithExceptionDetails()
+                .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder().WithDefaultDestructurers())
+                .WriteTo.Console(new JsonFormatter(renderMessage: true))
                 .CreateLogger();
         }
         
