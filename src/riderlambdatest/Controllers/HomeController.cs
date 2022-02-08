@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace riderlambdatest.Controllers
 {
@@ -15,9 +17,25 @@ namespace riderlambdatest.Controllers
     [Route("/[controller]")]
     public class HomeAgainController : Controller
     {
+        private readonly ILogger<HomeAgainController> logger;
+
+        public HomeAgainController(ILogger<HomeAgainController> logger)
+        {
+            this.logger = logger;
+        }
+        
         public IActionResult Index()
         {
-            return View("Index");
+            try
+            {
+                throw new Exception("Poopies");
+                return View("Index");
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError("Something!", ex);
+                throw;
+            }
         } 
     }
 }
